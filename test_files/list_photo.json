@@ -1,0 +1,325 @@
+{
+  "feed": {
+    "gphoto$bytesUsed": {
+      "$t": "hihihi"
+    }, 
+    "subtitle": {
+      "$t": "hihihi", 
+      "type": "text"
+    }, 
+    "xmlns$exif": "http://schemas.google.com/photos/exif/2007", 
+    "gphoto$location": {
+      "$t": "hihihi"
+    }, 
+    "gphoto$allowPrints": {
+      "$t": "hihihi"
+    }, 
+    "openSearch$itemsPerPage": {
+      "$t": 1000
+    }, 
+    "gphoto$name": {
+      "$t": "hihihi"
+    }, 
+    "xmlns$media": "http://search.yahoo.com/mrss/", 
+    "category": [
+      {
+        "term": "http://schemas.google.com/photos/2007#album", 
+        "scheme": "http://schemas.google.com/g/2005#kind"
+      }
+    ], 
+    "rights": {
+      "$t": "hihihi", 
+      "type": "text"
+    }, 
+    "generator": {
+      "$t": "hihihi", 
+      "version": "1.00", 
+      "uri": "http://picasaweb.google.com/"
+    }, 
+    "author": [
+      {
+        "name": {
+          "$t": "hihihi"
+        }, 
+        "uri": {
+          "$t": "hihihi"
+        }
+      }
+    ], 
+    "openSearch$startIndex": {
+      "$t": 1
+    }, 
+    "id": {
+      "$t": "hihihi"
+    }, 
+    "gphoto$id": {
+      "$t": "hihihi"
+    }, 
+    "gphoto$albumType": {
+      "$t": "hihihi"
+    }, 
+    "gphoto$timestamp": {
+      "$t": "hihihi"
+    }, 
+    "updated": {
+      "$t": "hihihi"
+    }, 
+    "xmlns$gphoto": "http://schemas.google.com/photos/2007", 
+    "gphoto$user": {
+      "$t": "hihihi"
+    }, 
+    "link": [
+      {
+        "href": "https://plouf", 
+        "type": "application/atom+xml", 
+        "rel": "http://schemas.google.com/g/2005#feed"
+      }, 
+      {
+        "href": "https://plouf", 
+        "type": "application/atom+xml", 
+        "rel": "http://schemas.google.com/g/2005#post"
+      }, 
+      {
+        "href": "https://plouf", 
+        "type": "application/atom+xml", 
+        "rel": "http://schemas.google.com/g/2005#resumable-create-media"
+      }, 
+      {
+        "href": "https://plouf", 
+        "type": "text/html", 
+        "rel": "alternate"
+      }, 
+      {
+        "href": "https://plouf", 
+        "type": "application/x-shockwave-flash", 
+        "rel": "http://schemas.google.com/photos/2007#slideshow"
+      }, 
+      {
+        "href": "https://plouf", 
+        "type": "text/html", 
+        "rel": "http://schemas.google.com/photos/2007#report"
+      }, 
+      {
+        "href": "https://plouf", 
+        "type": "application/atom+xml", 
+        "rel": "http://schemas.google.com/acl/2007#accessControlList"
+      }, 
+      {
+        "href": "https://plouf", 
+        "type": "application/atom+xml", 
+        "rel": "self"
+      }
+    ], 
+    "xmlns$openSearch": "http://a9.com/-/spec/opensearchrss/1.0/", 
+    "gphoto$numphotosremaining": {
+      "$t": 1999
+    }, 
+    "gphoto$commentCount": {
+      "$t": 0
+    }, 
+    "gphoto$commentingEnabled": {
+      "$t": "hihihi"
+    }, 
+    "icon": {
+      "$t": "hihihi"
+    }, 
+    "gphoto$nickname": {
+      "$t": "hihihi"
+    }, 
+    "xmlns": "http://www.w3.org/2005/Atom", 
+    "gphoto$allowDownloads": {
+      "$t": "hihihi"
+    }, 
+    "openSearch$totalResults": {
+      "$t": 1
+    }, 
+    "title": {
+      "$t": "hihihi", 
+      "type": "text"
+    }, 
+    "gphoto$numphotos": {
+      "$t": 1
+    }, 
+    "gphoto$access": {
+      "$t": "hihihi"
+    }, 
+    "entry": [
+      {
+        "gphoto$width": {
+          "$t": "hihihi"
+        }, 
+        "gphoto$height": {
+          "$t": "hihihi"
+        }, 
+        "id": {
+          "$t": "hihihi"
+        }, 
+        "category": [
+          {
+            "term": "http://schemas.google.com/photos/2007#photo", 
+            "scheme": "http://schemas.google.com/g/2005#kind"
+          }
+        ], 
+        "gphoto$position": {
+          "$t": 0.0
+        }, 
+        "gphoto$license": {
+          "url": "", 
+          "$t": "hihihi", 
+          "id": 0, 
+          "name": "All Rights Reserved"
+        }, 
+        "title": {
+          "$t": "hihihi", 
+          "type": "text"
+        }, 
+        "gphoto$shapes": {
+          "faces": "done"
+        }, 
+        "content": {
+          "src": "https://plouf", 
+          "type": "image/png"
+        }, 
+        "gphoto$id": {
+          "$t": "hihihi"
+        }, 
+        "exif$tags": {
+          "exif$imageUniqueID": {
+            "$t": "hihihi"
+          }
+        }, 
+        "gphoto$streamId": [
+          {
+            "$t": "hihihi"
+          }
+        ], 
+        "gphoto$timestamp": {
+          "$t": "hihihi"
+        }, 
+        "updated": {
+          "$t": "hihihi"
+        }, 
+        "gphoto$version": {
+          "$t": "hihihi"
+        }, 
+        "gphoto$checksum": {
+          "$t": "hihihi"
+        }, 
+        "media$group": {
+          "media$credit": [
+            {
+              "$t": "hihihi"
+            }
+          ], 
+          "media$title": {
+            "$t": "hihihi", 
+            "type": "plain"
+          }, 
+          "media$content": [
+            {
+              "url": "https://plouf", 
+              "width": 512, 
+              "medium": "image", 
+              "type": "image/png", 
+              "height": 377
+            }
+          ], 
+          "media$thumbnail": [
+            {
+              "url": "https://plouf", 
+              "width": 72, 
+              "height": 54
+            }, 
+            {
+              "url": "https://plouf", 
+              "width": 144, 
+              "height": 107
+            }, 
+            {
+              "url": "https://plouf", 
+              "width": 288, 
+              "height": 213
+            }
+          ], 
+          "media$keywords": {}, 
+          "media$description": {
+            "$t": "hihihi", 
+            "type": "plain"
+          }
+        }, 
+        "gphoto$size": {
+          "$t": "hihihi"
+        }, 
+        "link": [
+          {
+            "href": "https://plouf", 
+            "type": "application/atom+xml", 
+            "rel": "http://schemas.google.com/g/2005#feed"
+          }, 
+          {
+            "href": "https://plouf", 
+            "type": "text/html", 
+            "rel": "alternate"
+          }, 
+          {
+            "href": "https://plouf", 
+            "type": "text/html", 
+            "rel": "http://schemas.google.com/photos/2007#canonical"
+          }, 
+          {
+            "href": "https://plouf", 
+            "type": "application/atom+xml", 
+            "rel": "self"
+          }, 
+          {
+            "href": "https://plouf", 
+            "type": "application/atom+xml", 
+            "rel": "edit"
+          }, 
+          {
+            "href": "https://plouf", 
+            "type": "image/jpeg", 
+            "rel": "edit-media"
+          }, 
+          {
+            "href": "https://plouf", 
+            "type": "image/jpeg", 
+            "rel": "media-edit"
+          }, 
+          {
+            "href": "https://plouf", 
+            "type": "text/html", 
+            "rel": "http://schemas.google.com/photos/2007#report"
+          }
+        ], 
+        "gphoto$commentCount": {
+          "$t": 0
+        }, 
+        "gphoto$commentingEnabled": {
+          "$t": "hihihi"
+        }, 
+        "gphoto$albumid": {
+          "$t": "hihihi"
+        }, 
+        "gphoto$client": {
+          "$t": "hihihi"
+        }, 
+        "summary": {
+          "$t": "hihihi", 
+          "type": "text"
+        }, 
+        "gphoto$imageVersion": {
+          "$t": "hihihi"
+        }, 
+        "gphoto$access": {
+          "$t": "hihihi"
+        }, 
+        "published": {
+          "$t": "hihihi"
+        }
+      }
+    ]
+  }, 
+  "version": "1.0", 
+  "encoding": "UTF-8"
+}
