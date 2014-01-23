@@ -1,0 +1,67 @@
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="./css/receiver.css" />
+	<link rel="stylesheet" type="text/css" href="./css/common.css" />
+	<script src="/js/slideshow.js"></script>
+	<script src="/js/chromecast.js"></script>
+<body class="initial">
+	<div class="messages">
+		<h1>Waiting for Messages...</h1>
+	</div>
+        <div id="images">
+	</div>
+
+
+	<div id="warning">
+		<div id="warning-wrapper">
+		</div>
+	</div>
+	<div id="loading" style="display:none" >
+		<img src="/img/loading-gif-animation.gif" class="loading_img"></img>
+	</div>
+</body>
+
+<script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+<script src="https://www.gstatic.com/cast/js/receiver/1.0/cast_receiver.js"></script>
+<script>
+	$(function() {
+		var receiver = new cast.receiver.Receiver('bae39ebd-fe4c-45ef-9869-054a53d1c993', ['BENJI']),
+			channelHandler = new cast.receiver.ChannelHandler('BENJI'),
+			$messages = $('.messages'),
+			$body = $('body');
+		
+		channelHandler.addChannelFactory(
+			receiver.createChannelFactory('BENJI'));
+
+		receiver.start();
+
+		channelHandler.addEventListener(cast.receiver.Channel.EventType.MESSAGE, onMessage.bind(this));
+
+		function onMessage(event) {
+            if (event.message.hasOwnProperty("images")){
+			   	var images = document.getElementById("images");
+			   	slideshow(event.message.images, images);
+			}
+			else if(event.message.hasOwnProperty("command")){
+				switch (event.message.command.name){
+					case "warning":
+						start_warning(event.message.command.parameters.message);
+						break;
+					case "loading":
+						if (event.message.command.parameters.load){
+							loader.start();
+						}else{
+							loader.stop();
+						}
+					default:
+						console.log("unknown command message " + event.message.command.name);
+						break;
+				}
+			}else{
+			   	$messages.html(event.message.type);
+            } 
+		}
+	});
+</script>
+
+</html>

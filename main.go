@@ -80,6 +80,7 @@ func main() {
     r.HandleFunc("/", handleRoot)
     r.HandleFunc("/js/{file}", handleJS)
     r.HandleFunc("/img/{file}", handleIMG)
+    r.HandleFunc("/css/{file}", handleCSS)
     r.HandleFunc("/authorize", handleAuthorize)
     r.HandleFunc("/oauth2callback", handleOAuth2Callback)
     r.HandleFunc("/album", handleAlbum)
@@ -204,6 +205,17 @@ func handleIMG(w http.ResponseWriter, r *http.Request){
     vars := mux.Vars(r)
     file := vars["file"]
     file_content, err := ioutil.ReadFile("./img/" + string(file))
+    if err != nil {
+        io.WriteString(w, "Failed to retrieve file")
+        return
+    }
+    io.WriteString(w, string(file_content))
+}
+
+func handleCSS(w http.ResponseWriter, r *http.Request){
+    vars := mux.Vars(r)
+    file := vars["file"]
+    file_content, err := ioutil.ReadFile("./css/" + string(file))
     if err != nil {
         io.WriteString(w, "Failed to retrieve file")
         return
