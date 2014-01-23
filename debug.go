@@ -7,6 +7,7 @@ import (
     "net/http"
     "html/template"
     "io"
+    "io/ioutil"
     "time"
     "os/exec"
     "encoding/json"
@@ -27,7 +28,12 @@ func handleDebugRoot(w http.ResponseWriter, r *http.Request){
         //TODO remove previous cookie...
         notDebugAuthenticatedTemplate.Execute(w, nil)    
     }else{
-        mainTemplate.Execute(w, nil)
+        file_content, err := ioutil.ReadFile("./html/index.html")
+        if err != nil {
+            io.WriteString(w, "Failed to retrieve file")
+            return
+        }
+        io.WriteString(w, string(file_content))
     }
 }
 
@@ -62,7 +68,7 @@ func handleDebugListAlbum(w http.ResponseWriter, r *http.Request){
     var result = make([]Image, 8)
     for i:=0;i<8;i++{
         i_str := strconv.Itoa(i)
-        alb := Image{Name:"Image" + string(i_str), Icon: "/img/default_img.png", Content: "/img/default_content.png"}
+        alb := Image{Name:"Image" + string(i_str), Icon: "/img/default_img.png", Content: "/img/default_content.png", Height: "128", Width: "128"}
         result[i] = alb
     }
     b, _ := json.Marshal(result)
@@ -72,4 +78,14 @@ func handleDebugListAlbum(w http.ResponseWriter, r *http.Request){
 func handleDebugAuthorize(w http.ResponseWriter, r *http.Request){
 
     http.Redirect(w, r, "/oauth2callback?debug=1", http.StatusFound)
+}
+
+func handleDebugMain(w http.ResponseWriter, r *http.Request){
+
+    file_content, err := ioutil.ReadFile("./html/debug.html")
+    if err != nil {
+        io.WriteString(w, "Failed to retrieve file")
+        return
+    }
+    io.WriteString(w, string(file_content))
 }

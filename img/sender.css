@@ -1,0 +1,67 @@
+.receiver-list {
+	list-style: none;
+	padding-left: 0px;
+}
+
+.album_div{
+    border: 1px solid #CCC;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    padding: 3px 3px 3px 3px;
+    margin: 5px;
+	background-color: yellow;
+}
+.album_div:hover {
+	background-color: blue;
+}
+
+.display_overlay {
+	position: absolute;
+	top:0;
+	left:0;
+	width: 75%;
+	height: 75%;
+	margin-left: 12.5%;
+	margin-top: 12.5%;
+	/*margin-left: 50%;
+	margin-right: 20;
+	margin-bottom: 20;
+	margin-top: 20;*/
+	
+	border: 3px solid #CCC;
+	
+}
+.main_display_image{
+	display: block;
+	margin: auto auto;
+}
+
+#command {
+    height: 32px;
+    margin: 1em 0;
+    text-align: left;
+}
+
+#command label {
+    display: inline-block;
+    /*width: 32px;*/
+    height: 32px;
+    line-height: 32px;
+    text-decoration: none;
+    text-align: center;
+    color: #fff;
+    background: #a00;
+    margin-right: 1em;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    padding: 3px 3px 3px 3px;
+    margin: 5px;
+}
+
+#command label:hover {
+ 
+    color: #ddd;
+    background-color: #b00;
+}

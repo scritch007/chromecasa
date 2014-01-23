@@ -32,15 +32,6 @@ This app is now authenticated to access your Google user info.  Your details are
 </body></html>
 `));
 
-var mainTemplate = template.Must(template.New("").Parse(`
-<html>
-<head>
-<script src="/js/main.js"></script>
-</head>
-<body onload="main()">
-</body>
-</html>
-`));
 
 // variables used during oauth protocol flow of authentication
 var (
@@ -78,11 +69,12 @@ func main() {
 
     //DEBUG URL Handlers implementation defined in debug.go
     s := r.Queries("debug", "1").Subrouter()
-    r.HandleFunc("/", handleDebugRoot)
+    s.HandleFunc("/", handleDebugRoot)
     s.HandleFunc("/oauth2callback", handleDebugOAuthCallback)
     s.HandleFunc("/album", handleDebugAlbum)
     s.HandleFunc("/album/{id}", handleDebugListAlbum)
     s.HandleFunc("/authorize", handleDebugAuthorize)
+    s.HandleFunc("/debug", handleDebugMain)
 
     //PROD URL Handlers
     r.HandleFunc("/", handleRoot)
@@ -100,14 +92,12 @@ func main() {
 func getToken(r *http.Request) *oauth.Token{
     cookie, _ := r.Cookie("chromecast_ref")
 
-    fmt.Println(cookie)
     if cookie == nil {
         return nil
     }
 
     token, in_map := token_map[cookie.Value]
     
-    fmt.Println(token_map)
     //refreshToken := session.Values["refresh_token"]
     if !in_map {
         //TODO remove previous cookie...
@@ -121,6 +111,8 @@ type Image struct{
     Name string `json:"name"`
     Icon string `json:"icon"`
     Content string `json:"content"`
+    Height string `json:"height"`
+    Width string `json:"width"`
 }
 
 type Album struct{
@@ -170,20 +162,27 @@ func handleListAlbum(w http.ResponseWriter, r *http.Request){
     }
     t.Token = token
 
-    resp, err := t.Client().Get(albumFeedURL + "/albumid/" + id + "?alt=json")
+    //TODO we should be able to specify the imgmax, maybe depending on the network speed.
+    //Need to find a way on how to find out the speed
+    //For now the 1600 should be enough
+    resp, err := t.Client().Get(albumFeedURL + "/albumid/" + id + "?alt=json&imgmax=1600")
 
     if( err != nil){
         fmt.Println("Got an error", err);
+        io.WriteString(w, string("{\"error\": \"Failed to retrieve album information\"}"))
+        return
     }
     
     buf, err := ioutil.ReadAll(resp.Body)
+
+    fmt.Println(string(buf))
     
     m, _ := chromecasa.Parse(buf)
 
     
     var result = make([]Image, len(m.Feed.Entries))
     for i, album := range m.Feed.Entries{
-        alb := Image{Name:album.Title.Value, Icon: album.Media.Icon[0].Url, Content: album.Media.Content[0].Url}
+        alb := Image{Name:album.Title.Value, Icon: album.Media.Icon[0].Url, Content: album.Media.Content[0].Url, Height: album.Height.Value, Width:album.Width.Value}
         result[i] = alb
     }
     b, _ := json.Marshal(result)
@@ -219,7 +218,13 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
         //TODO remove previous cookie...
         notAuthenticatedTemplate.Execute(w, nil)    
     }else{
-        mainTemplate.Execute(w, nil)
+        file_content, err := ioutil.ReadFile("./html/index.html")
+        if err != nil {
+            io.WriteString(w, "Failed to retrieve file")
+            return
+        }
+        io.WriteString(w, string(file_content))
+        
     }
     
 }

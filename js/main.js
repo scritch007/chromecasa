@@ -1,7 +1,8 @@
 function sendRequest(url, success, error){
 
-	if (-1 != window.location.search.indexOf("debug=1")){
-		url += "?debug=1"
+	//Check if page was loaded in debug mode
+	if (debug_mode()){
+		url += "?debug=1";
 	}
 	var xhr = new XMLHttpRequest();
     xhr.open("GET", url);
@@ -20,25 +21,71 @@ function sendRequest(url, success, error){
       
     }
 }
+function debug_mode(){
+	return (-1 != window.location.search.indexOf("debug=1"));
+}
+
+
+
+function display_images(result){
+	if (debug_mode() || (-1 != window.location.search.indexOf("noccast=1")))
+	{
+		//TODO DEBUG MODE...
+
+		var slideshow_wrapper = document.getElementById("slideshow-wrapper");
+		if (slideshow_wrapper === null){
+			var display_overlay = document.createElement("div");
+			display_overlay.className = "display_overlay";
+			document.body.appendChild(display_overlay);
+			var slideshow = document.createElement("div");
+			slideshow.id = "slideshow";
+			display_overlay.appendChild(slideshow);
+			var slideshow_wrapper = document.createElement("div");
+			slideshow_wrapper.id = "slideshow-wrapper";
+			slideshow.appendChild(slideshow_wrapper)
+		}
+		
+		SlideShow(result, slideshow_wrapper);
+		return;
+	}
+	cast_api.sendMessage(cv_activity.activityId, 'BENJI', {images: result});
+}
+var g_albums = [];
 
 function displayAlbums(albums){
-	document.body.innerHTML = "";
+	var main_display = document.getElementById("main_display");
+	main_display.innerHTML = "";
+	g_albums = albums;
+
 	for(var i=0; i<albums.length; i++){
 		var album = albums[i];
 		var alb_div = document.createElement("div");
+		alb_div.className = "album_div";
 		var label = document.createElement("label");
 		label.innerHTML = album.name;
 		var img = document.createElement("img");
 		img.src = album.icon;
-		alb_div.appendChild(label);
 		alb_div.appendChild(img);
-		document.body.appendChild(alb_div);
+		alb_div.appendChild(label);
+		
+		main_display.appendChild(alb_div);
+		
 		alb_div.onclick = function(){
-			sendRequest("/album/" + album.id);
-		}.bind(album);
+			var album_id = album.id;
+			return function(){
+				sendRequest("/album/" + album_id, display_images);
+			}
+		}();
 	}
 }
 
 function main(){
+	if(debug_mode())
+	{
+		//If we are in debug mode then we'll load the javascript file for the slideshow display
+		var script = document.createElement("script");
+		script.src = "/js/slideshow.js";
+		document.body.appendChild(script);
+	}
 	albums = sendRequest("album", displayAlbums);
 }

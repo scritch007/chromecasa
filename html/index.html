@@ -1,0 +1,102 @@
+<html data-cast-api-enabled="true">
+	<head>
+		<title>Hello World Chrome Sender</title>
+		<link rel="stylesheet" type="text/css" href="/img/sender.css" />
+		<link rel="stylesheet" type="text/css" href="/img/common.css" />
+		<script src="/js/main.js"></script>
+		<script src="/js/slideshow.js"></script>
+	</head>
+	<body onload="main()">
+		<div class="receiver-div">
+			<h3>Choose A Receiver</h3>
+			<ul class="receiver-list">
+				<li>Looking for receivers...</li>
+			</ul>
+		</div>
+		<button class="kill" disabled>Kill the Connection</button>
+		<input type="text" id="message_input">message</input>
+		<button class="send">Send Message</button>
+		<div id="main_display"></div>
+	</body>
+
+	<script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+	<script src="http://underscorejs.org/underscore-min.js"></script>
+
+	<script>
+		var cast_api,
+			cv_activity,
+			receiverList,
+			$killSwitch = $('.kill'),
+			$send = $('.send');
+
+		window.addEventListener('message', function(event) {
+			if (event.source === window && event.data &&
+					event.data.source === 'CastApi' &&
+					event.data.event === 'Hello') {
+				initializeApi();
+			}
+		});
+
+		initializeApi = function() {
+			if (!cast_api) {
+				cast_api = new cast.Api();
+				cast_api.addReceiverListener('bae39ebd-fe4c-45ef-9869-054a53d1c993', onReceiverList);
+			}
+		};
+
+		onReceiverList = function(list) {
+			if (list.length > 0) {
+				receiverList = list;
+				$('.receiver-list').empty();
+				receiverList.forEach(function(receiver) {
+					$listItem = $('<li><a href="#" data-id="' + receiver.id + '">' + receiver.name + '</a></li>');
+					$listItem.on('click', receiverClicked);
+					$('.receiver-list').append($listItem);
+				});
+			}
+		};
+
+		receiverClicked = function(e) {
+			e.preventDefault();
+
+			var $target = $(e.target),
+				receiver = _.find(receiverList, function(receiver) {
+					return receiver.id === $target.data('id');
+				});
+
+			doLaunch(receiver);
+		};
+
+		doLaunch = function(receiver) {
+			if (!cv_activity) {
+				var request = new cast.LaunchRequest('bae39ebd-fe4c-45ef-9869-054a53d1c993', receiver);
+
+				$killSwitch.prop('disabled', false);
+
+				cast_api.launch(request, onLaunch);
+			}
+		};
+
+		onLaunch = function(activity) {
+			if (activity.status === 'running') {
+				cv_activity = activity;
+				
+				cast_api.sendMessage(cv_activity.activityId, 'BENJI', {type: 'HelloWorld'});
+			}
+		};
+
+		$killSwitch.on('click', function() {
+			cast_api.stopActivity(cv_activity.activityId, function(){
+				cv_activity = null;
+			
+				$killSwitch.prop('disabled', true);
+			});
+		});
+		$send.on('click', function(){
+			var message_to_send = document.getElementById("message_input").value;
+			if (cv_activity.status === 'running'){
+				cast_api.sendMessage(cv_activity.activityId, 'BENJI', {type: message_to_send});
+			}
+		});
+	</script>
+</html>

@@ -17,7 +17,7 @@ type Category struct {
 type Image struct{
 	Url string `json:"url"`
 	Width int `json:"width"`
-	Height int `json:"width"`
+	Height int `json:"height"`
 	Medium string `json:"medium"`
 	Type string `json:"type"` 
 }
@@ -30,6 +30,8 @@ type Entry struct {
 	Category []Category `json:"category"`
 	Id TFeed `json:"gphoto$id"`
 	Name TFeed `json:"gphoto$name"`
+	Width TFeed `json:"gphoto$width"`
+	Height TFeed `json:"gphoto$height"`
 	Media MediaGroup `json:"media$group"`
 	Title TFeed `json:"title"`
 }
