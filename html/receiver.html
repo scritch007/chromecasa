@@ -8,13 +8,13 @@
 	<div class="messages">
 		<h1>Waiting for Messages...</h1>
 	</div>
-        <div id="images">
+	<div id="slideshow">
+		<div id="slideshow-wrapper"></div>
 	</div>
 
 
 	<div id="warning">
-		<div id="warning-wrapper">
-		</div>
+		<div id="warning-wrapper"></div>
 	</div>
 	<div id="loading" style="display:none" >
 		<img src="/img/loading-gif-animation.gif" class="loading_img"></img>
@@ -39,8 +39,9 @@
 
 		function onMessage(event) {
             if (event.message.hasOwnProperty("images")){
-			   	var images = document.getElementById("images");
-			   	slideshow(event.message.images, images);
+			   	var slideshow_wrapper = document.getElementById("slideshow-wrapper");
+			   	var slideshow = new SlideShow(event.message.images, slideshow_wrapper);
+			   	slideshow.start();
 			}
 			else if(event.message.hasOwnProperty("command")){
 				switch (event.message.command.name){
