@@ -4,6 +4,12 @@ var display_timeout = 3000;
 var display_height = window.screen.availHeight;
 var display_width = window.screen.availWidth;
 
+if (display_height == 0){
+	//We are on a chromecast
+	display_height = 1080;
+	display_width = 1920;
+}
+
 function SlideShow(images, in_display){
 	this.current_image = 0;
 	this.images = images;
@@ -38,6 +44,8 @@ SlideShow.prototype.add = function(src){
 	img.src = src.content;
 	img.width = ratio * img_width;
 	img.height = ratio * img_height;
+	img.style.marginLeft = -img.width/2;
+	img.style.marginTop = -img.height/2;
 	img.className = "hide";
 	this.display.appendChild(img);
 	this.image_list.push(img);
@@ -66,8 +74,7 @@ SlideShow.prototype.display_me = function(){
 
 		this.next();
 		var slideshow = this;
-		this.timeout = setTimeout(function(){ 
-			 
+		this.timeout = setTimeout(function(){ 			 
 			return function(){
 				slideshow.display_me()
 			}
@@ -103,7 +110,7 @@ SlideShow.prototype.next = function(){
 	if (i < (this.images.length - this.offset))
 	{
 		//We want to preload some other images so start loading the images
-		img = this.add(this.images[i])
+		img = this.add(this.images[i + this.offset])
 	}
 	if (0 != i)
 	{
