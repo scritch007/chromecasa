@@ -19,6 +19,14 @@ function start(){
 			width: "2448"
 		}
 	];
+	for (var i=1; i < 22; i++){
+		result.push({
+			name: "Photo " + (i+3),
+			content: "/img/200." + i + ".png",
+			height: "200",
+			width:"400"
+		});
+	}
 
 	var slideshow_wrapper = document.getElementById("slideshow-wrapper");
 	var slideshow = new SlideShow(result, slideshow_wrapper)
