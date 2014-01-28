@@ -29,7 +29,7 @@
 			channelHandler = new cast.receiver.ChannelHandler('BENJI'),
 			$messages = $('.messages'),
 			$body = $('body');
-		
+
 		channelHandler.addChannelFactory(
 			receiver.createChannelFactory('BENJI'));
 
@@ -60,7 +60,7 @@
 				}
 			}else{
 			   	$messages.html(event.message.type);
-            } 
+            }
 		}
 	});
 </script>

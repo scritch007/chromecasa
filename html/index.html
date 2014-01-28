@@ -80,7 +80,7 @@
 		onLaunch = function(activity) {
 			if (activity.status === 'running') {
 				cv_activity = activity;
-				
+
 				cast_api.sendMessage(cv_activity.activityId, 'BENJI', {type: 'HelloWorld'});
 			}
 		};
@@ -88,7 +88,7 @@
 		$killSwitch.on('click', function() {
 			cast_api.stopActivity(cv_activity.activityId, function(){
 				cv_activity = null;
-			
+
 				$killSwitch.prop('disabled', true);
 			});
 		});

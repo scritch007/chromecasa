@@ -2,28 +2,15 @@ package main
 
 
 import (
-    "code.google.com/p/goauth2/oauth"
     "github.com/gorilla/mux"
     "net/http"
     "html/template"
     "io"
     "io/ioutil"
-    "fmt"
-    "time"
-    "os/exec"
-    "github.com/scritch007/chromecasa/parser"
-    "encoding/json"
+    "./picasa"
+    "github.com/scritch007/chromecasa/chromecasa"
+    "./debug"
 )
-
-var token_map = map[string]oauth.Token{}
-
-var notAuthenticatedTemplate = template.Must(template.New("").Parse(`
-<html><body>
-You have currently not given permissions to access your data. Please authenticate this app with the Google OAuth provider.
-<form action="/authorize" method="POST"><input type="submit" value="Ok, authorize this app with my id"/></form>
-</body></html>
-`));
-
 
 var userInfoTemplate = template.Must(template.New("").Parse(`
 <html><body>
@@ -32,165 +19,50 @@ This app is now authenticated to access your Google user info.  Your details are
 </body></html>
 `));
 
-
-// variables used during oauth protocol flow of authentication
-var (
-    code = ""
-    token = ""
-)
-
-var oauthCfg = &oauth.Config {
-        //TODO: put your project's Client Id here.  To be got from https://code.google.com/apis/console
-        ClientId: "106373453700.apps.googleusercontent.com",
-
-        //TODO: put your project's Client Secret value here https://code.google.com/apis/console
-        ClientSecret: "x_1Ebngp5sfvKkB-vqN-Q260",
-
-        //For Google's oauth2 authentication, use this defined URL
-        AuthURL: "https://accounts.google.com/o/oauth2/auth",
-
-        //For Google's oauth2 authentication, use this defined URL
-        TokenURL: "https://accounts.google.com/o/oauth2/token",
-
-        //To return your oauth2 code, Google will redirect the browser to this page that you have defined
-        //TODO: This exact URL should also be added in your Google API console for this project within "API Access"->"Redirect URIs"
-        RedirectURL: "http://127.0.0.1:3000/oauth2callback",
-
-        //This is the 'scope' of the data that you are asking the user's permission to access. For getting user's info, this is the url that Google has defined.
-        Scope: "https://www.googleapis.com/auth/userinfo.profile https://picasaweb.google.com/data/",
-    }
-
-//This is the URL that Google has defined so that an authenticated application may obtain the user's info in json format
-const profileInfoURL = "https://www.googleapis.com/oauth2/v1/userinfo?alt=json"
-const albumFeedURL = "https://picasaweb.google.com/data/feed/api/user/default"
-
 func main() {
     r := mux.NewRouter()
 
+    tStore := new(chromecasa.TokenStore)
+    tStore.Init()
+
+    m := new(Main)
+    m.TokenStore = tStore
+    d := new(debug.Debug)
+    d.TokenStore = tStore
+
+    p := new(picasa.Picasa)
+    p.TokenStore = tStore
+
     //DEBUG URL Handlers implementation defined in debug.go
     s := r.Queries("debug", "1").Subrouter()
-    s.HandleFunc("/", handleDebugRoot)
-    s.HandleFunc("/oauth2callback", handleDebugOAuthCallback)
-    s.HandleFunc("/album", handleDebugAlbum)
-    s.HandleFunc("/album/{id}", handleDebugListAlbum)
-    s.HandleFunc("/authorize", handleDebugAuthorize)
-    s.HandleFunc("/debug", handleDebugMain)
+    s.HandleFunc("/", d.HandleRoot)
+    s.HandleFunc("/oauth2callback", d.HandleOAuthCallback)
+    s.HandleFunc("/album", d.HandleAlbum)
+    s.HandleFunc("/album/{id}", d.HandleListAlbum)
+    s.HandleFunc("/authorize", d.HandleAuthorize)
+    s.HandleFunc("/debug", d.HandleMain)
 
     //PROD URL Handlers
-    r.HandleFunc("/", handleRoot)
-    r.HandleFunc("/js/{file}", handleJS)
-    r.HandleFunc("/img/{file}", handleIMG)
-    r.HandleFunc("/css/{file}", handleCSS)
-    r.HandleFunc("/authorize", handleAuthorize)
-    r.HandleFunc("/oauth2callback", handleOAuth2Callback)
-    r.HandleFunc("/album", handleAlbum)
-    r.HandleFunc("/album/{id}", handleListAlbum)
+    r.HandleFunc("/", m.handleRoot)
+    r.HandleFunc("/js/{file}", m.handleJS)
+    r.HandleFunc("/img/{file}", m.handleIMG)
+    r.HandleFunc("/css/{file}", m.handleCSS)
+
+    pic := r.Queries("provider", "picasa").Subrouter()
+    pic.HandleFunc("/authorize", p.HandleAuthorize)
+    pic.HandleFunc("/oauth2callback", p.HandleOAuth2Callback)
+    pic.HandleFunc("/album", p.HandleAlbum)
+    pic.HandleFunc("/album/{id}", p.HandleListAlbum)
     http.Handle("/", r)
     //Google will redirect to this page to return your code, so handle it appropriately
     http.ListenAndServe("localhost:3000", nil)
 }
 
-func getToken(r *http.Request) *oauth.Token{
-    cookie, _ := r.Cookie("chromecast_ref")
-
-    if cookie == nil {
-        return nil
-    }
-
-    token, in_map := token_map[cookie.Value]
-    
-    //refreshToken := session.Values["refresh_token"]
-    if !in_map {
-        //TODO remove previous cookie...
-        return nil
-    }else{
-        return &token
-    }
+type Main struct{
+    TokenStore *chromecasa.TokenStore
 }
 
-type Image struct{
-    Name string `json:"name"`
-    Icon string `json:"icon"`
-    Content string `json:"content"`
-    Height string `json:"height"`
-    Width string `json:"width"`
-}
-
-type Album struct{
-    Name string `json:"name"`
-    Id string `json:"id"`
-    Icon string `json:"icon"`
-}
-
-
-func handleAlbum(w http.ResponseWriter, r *http.Request){
-
-    t := &oauth.Transport{Config: oauthCfg}
-    token := getToken(r)
-    if token == nil{
-        io.WriteString(w, "[]")
-        return
-    }
-    t.Token = token
-
-    resp, err := t.Client().Get(albumFeedURL + "?alt=json")
-
-    if( err != nil){
-        fmt.Println("Got an error", err);
-        //TODO set headers and return an error code
-    }
-    
-    buf, err := ioutil.ReadAll(resp.Body)
-    m, _ := chromecasa.Parse(buf)
-
-    var result = make([]Album, len(m.Feed.Entries))
-    for i, album := range m.Feed.Entries{
-        alb := Album{Name:album.Name.Value, Id:album.Id.Value, Icon: album.Media.Icon[0].Url}
-        result[i] = alb
-    }
-    b, _ := json.Marshal(result)
-    io.WriteString(w, string(b))
-}
-
-func handleListAlbum(w http.ResponseWriter, r *http.Request){
-    vars := mux.Vars(r)
-    id := vars["id"]
-    t := &oauth.Transport{Config: oauthCfg}
-    token := getToken(r)
-    if token == nil{
-        io.WriteString(w, "[]")
-        return
-    }
-    t.Token = token
-
-    //TODO we should be able to specify the imgmax, maybe depending on the network speed.
-    //Need to find a way on how to find out the speed
-    //For now the 1600 should be enough
-    resp, err := t.Client().Get(albumFeedURL + "/albumid/" + id + "?alt=json&imgmax=1600")
-
-    if( err != nil){
-        fmt.Println("Got an error", err);
-        io.WriteString(w, string("{\"error\": \"Failed to retrieve album information\"}"))
-        return
-    }
-    
-    buf, err := ioutil.ReadAll(resp.Body)
-
-    fmt.Println(string(buf))
-    
-    m, _ := chromecasa.Parse(buf)
-
-    
-    var result = make([]Image, len(m.Feed.Entries))
-    for i, album := range m.Feed.Entries{
-        alb := Image{Name:album.Title.Value, Icon: album.Media.Icon[0].Url, Content: album.Media.Content[0].Url, Height: album.Height.Value, Width:album.Width.Value}
-        result[i] = alb
-    }
-    b, _ := json.Marshal(result)
-    io.WriteString(w, string(b))   
-}
-
-func handleJS(w http.ResponseWriter, r *http.Request){
+func (m *Main)handleJS(w http.ResponseWriter, r *http.Request){
     vars := mux.Vars(r)
     file := vars["file"]
     file_content, err := ioutil.ReadFile("./js/" + string(file))
@@ -201,7 +73,7 @@ func handleJS(w http.ResponseWriter, r *http.Request){
     io.WriteString(w, string(file_content))
 }
 
-func handleIMG(w http.ResponseWriter, r *http.Request){
+func (m *Main)handleIMG(w http.ResponseWriter, r *http.Request){
     vars := mux.Vars(r)
     file := vars["file"]
     file_content, err := ioutil.ReadFile("./img/" + string(file))
@@ -212,7 +84,7 @@ func handleIMG(w http.ResponseWriter, r *http.Request){
     io.WriteString(w, string(file_content))
 }
 
-func handleCSS(w http.ResponseWriter, r *http.Request){
+func (m *Main)handleCSS(w http.ResponseWriter, r *http.Request){
     vars := mux.Vars(r)
     file := vars["file"]
     file_content, err := ioutil.ReadFile("./css/" + string(file))
@@ -223,56 +95,21 @@ func handleCSS(w http.ResponseWriter, r *http.Request){
     io.WriteString(w, string(file_content))
 }
 
-func handleRoot(w http.ResponseWriter, r *http.Request) {
-    token := getToken(r)
-    
+func (m *Main)handleRoot(w http.ResponseWriter, r *http.Request) {
+    token := m.TokenStore.GetToken(r)
+
+    var file string
     if token == nil {
         //TODO remove previous cookie...
-        notAuthenticatedTemplate.Execute(w, nil)    
+        file = "./html/not_authenticated.html"
     }else{
-        file_content, err := ioutil.ReadFile("./html/index.html")
-        if err != nil {
-            io.WriteString(w, "Failed to retrieve file")
-            return
-        }
-        io.WriteString(w, string(file_content))
-        
+        file = "./html/index.html"
     }
-    
-}
-
-// Start the authorization process
-func handleAuthorize(w http.ResponseWriter, r *http.Request) {
-    //Get the Google URL which shows the Authentication page to the user
-    url := oauthCfg.AuthCodeURL("")
-
-    //redirect user to that page
-    http.Redirect(w, r, url, http.StatusFound)
-}
-
-// Function that handles the callback from the Google server
-func handleOAuth2Callback(w http.ResponseWriter, r *http.Request) {
-    //TODO make the actual correct checks if value is OK and deal with the errors
-
-    //Get the code from the response
-    code := r.FormValue("code")
-
-    t := &oauth.Transport{Config: oauthCfg}
-
-    // Exchange the received code for a token
-    token, _ := t.Exchange(code)
-
-    out, err := exec.Command("uuidgen").Output()
+    file_content, err := ioutil.ReadFile(file)
     if err != nil {
-        io.WriteString(w, "Failed to generate UUID")
+        io.WriteString(w, "Failed to retrieve file")
         return
     }
+    io.WriteString(w, string(file_content))
 
-    token_map[string(out[0:len(out) - 1])] = *token
-
-    expire := time.Now().AddDate(0, 0, 1)
-    cookie := http.Cookie{Name: "chromecast_ref", Value: string(out), Path: "/", Expires: expire}
-    http.SetCookie(w, &cookie)
-    
-    http.Redirect(w, r, "/", http.StatusFound)
 }
