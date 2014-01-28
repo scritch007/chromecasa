@@ -1,6 +1,11 @@
 function start_warning(text){
 	var elem = document.getElementById("warning-wrapper");
-	elem.innerHTML = text;
+
+	elem.innerHTML = "";
+	var label = document.createElement("label");
+	label.id = "warning-text";
+	label.innerHTML = text
+	elem.appendChild(label);
 	elem.style.opacity = 1;
 	setTimeout(function(){elem.style.opacity=0}, 2000);
 }

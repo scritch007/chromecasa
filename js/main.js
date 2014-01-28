@@ -1,12 +1,11 @@
 function sendRequest(url, success, error){
 
 	//Check if page was loaded in debug mode
-	if (debug_mode()){
-		url += "?debug=1";
-	}
+	url += window.location.search;
+
 	var xhr = new XMLHttpRequest();
     xhr.open("GET", url);
-    
+
     xhr.onload = function(e){
       var result = JSON.parse(xhr.responseText);
       success(result);
@@ -18,7 +17,7 @@ function sendRequest(url, success, error){
     try{
       xhr.send();
     }catch(err){
-      
+
     }
 }
 function debug_mode(){
@@ -44,11 +43,12 @@ function display_images(result){
 			slideshow_wrapper.id = "slideshow-wrapper";
 			slideshow.appendChild(slideshow_wrapper)
 		}
-		
+
 		SlideShow(result, slideshow_wrapper);
 		return;
 	}
 	cast_api.sendMessage(cv_activity.activityId, 'BENJI', {images: result});
+	cast_api.sendMessage(cv_activity.activityId, 'BENJI', {command: {name: 'loading', parameters:{load:false}}});
 }
 var g_albums = [];
 
@@ -67,12 +67,15 @@ function displayAlbums(albums){
 		img.src = album.icon;
 		alb_div.appendChild(img);
 		alb_div.appendChild(label);
-		
+
 		main_display.appendChild(alb_div);
-		
+
 		alb_div.onclick = function(){
 			var album_id = album.id;
 			return function(){
+				if (! debug_mode() && !(-1 != window.location.search.indexOf("noccast=1"))) {
+					cast_api.sendMessage(cv_activity.activityId, 'BENJI', {command: {name: 'loading', parameters:{load:true}}});
+				}
 				sendRequest("/album/" + album_id, display_images);
 			}
 		}();

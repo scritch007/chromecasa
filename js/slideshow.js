@@ -17,6 +17,7 @@ function SlideShow(images, in_display){
 	this.timeout = null;
 	this.image_list = [];
 	this.offset = Math.min(3, images.length);
+	this.loaded_index = 0;
 }
 
 var current_slideshow = null;
@@ -59,7 +60,7 @@ SlideShow.prototype.start = function(){
 	current_slideshow = this;
 	//PRELOAD some images
 
-	
+
 	for(var j = 0; j < this.offset; j++){
 		img = this.add(this.images[j])
 	}
@@ -68,13 +69,13 @@ SlideShow.prototype.start = function(){
 	this.display_me();
 }
 SlideShow.prototype.display_me = function(){
-		
+
 	var i = this.current_image;
 	if (i < this.images.length){
 
 		this.next();
 		var slideshow = this;
-		this.timeout = setTimeout(function(){ 			 
+		this.timeout = setTimeout(function(){
 			return function(){
 				slideshow.display_me()
 			}
@@ -96,6 +97,16 @@ SlideShow.prototype.previous = function(){
 
 		current_image.className = "hide";
 	}
+	if (this.current_image - this.offset >= 0){
+		//We need to add the image just in case it's displayed again
+		var toAdd = this.image_list[this.current_image - this.offset]
+		//We don't care were it is displayed because the other images will have the "hide" class
+		this.display.appendChild(toAdd);
+	}
+	if (this.current_image + this.offset < this.images.length){
+		var toRemove = this.image_list[this.current_image + this.offset - 1];
+		toRemove.parentNode.removeChild(toRemove);
+	}
 	this.current_image -= 1;
 	this.image_list[this.current_image - 1].className = "show";
 }
@@ -109,8 +120,28 @@ SlideShow.prototype.next = function(){
 	}
 	if (i < (this.images.length - this.offset))
 	{
-		//We want to preload some other images so start loading the images
-		img = this.add(this.images[i + this.offset])
+		if (i >= (this.image_list.length - this.offset ))
+		{
+			//We want to preload some other images so start loading the images
+			img = this.add(this.images[i + this.offset])
+		}
+	}
+
+	//Sometime we need to readd elements to the dom
+	if (i + this.offset < this.image_list.length){
+		var toCheck = this.image_list[i + this.offset];
+		if (null == toCheck.parentNode){
+			this.display.appendChild(toCheck);
+		}
+	}
+
+	if (i - this.offset >= 0){
+		//We need to remove some of the image because we don't have infinite memory
+		var toRemove = this.image_list[i-this.offset];
+		if (toRemove.parentNode)
+		{
+			toRemove.parentNode.removeChild(toRemove);
+		}
 	}
 	if (0 != i)
 	{
