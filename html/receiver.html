@@ -21,24 +21,44 @@
 	</div>
 </body>
 
-<script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
-<script src="https://www.gstatic.com/cast/js/receiver/1.0/cast_receiver.js"></script>
-<script>
-	$(function() {
-		var receiver = new cast.receiver.Receiver('bae39ebd-fe4c-45ef-9869-054a53d1c993', ['BENJI']),
-			channelHandler = new cast.receiver.ChannelHandler('BENJI'),
-			$messages = $('.messages'),
-			$body = $('body');
+<script src="https://www.gstatic.com/cast/js/receiver/2.0.0/cast_receiver.js"></script>
+<script type="text/javascript">
 
-		channelHandler.addChannelFactory(
-			receiver.createChannelFactory('BENJI'));
+	window.onload = function(){
+		cast.receiver.logger.setLevelValue(4);
+        window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
+        console.log('Starting Receiver Manager');
+        // handler for the 'ready' event
+        castReceiverManager.onReady = function(event) {
+          console.log('Received Ready event: ' + JSON.stringify(event.data));
+          window.castReceiverManager.setApplicationState("Application status is ready...");
+        };
 
-		receiver.start();
+        // handler for 'senderconnected' event
+        castReceiverManager.onSenderConnected = function(event) {
+          console.log('Received Sender Connected event: ' + event.data);
+          console.log(window.castReceiverManager.getSender(event.data).userAgent);
+        };
 
-		channelHandler.addEventListener(cast.receiver.Channel.EventType.MESSAGE, onMessage.bind(this));
+        // handler for 'senderdisconnected' event
+        castReceiverManager.onSenderDisconnected = function(event) {
+          console.log('Received Sender Disconnected event: ' + event.data);
+          if (window.castReceiverManager.getSenders().length == 0) {
+	        window.close();
+	      }
+        };
 
-		function onMessage(event) {
-            if (event.message.hasOwnProperty("images")){
+        // handler for 'systemvolumechanged' event
+        castReceiverManager.onSystemVolumeChanged = function(event) {
+          console.log('Received System Volume Changed event: ' + event.data['level'] + ' ' +
+              event.data['muted']);
+        };
+
+        window.messageBus =
+          window.castReceiverManager.getCastMessageBus('urn:x-cast:ws.legrand.chromecasa');
+
+        window.messageBus.onMessage = function(event) {
+          	if (event.message.hasOwnProperty("images")){
 			   	var slideshow_wrapper = document.getElementById("slideshow-wrapper");
 			   	var slideshow = new SlideShow(event.message.images, slideshow_wrapper);
 			   	slideshow.start();
@@ -59,10 +79,16 @@
 						break;
 				}
 			}else{
-			   	$messages.html(event.message.type);
+				document.getElementById("message").innerHTML=event.message.type;
+        		window.castReceiverManager.setApplicationState(text);
             }
-		}
-	});
+          // display the message from the sender
+          displayText(event.data);
+          // inform all senders on the CastMessageBus of the incoming message event
+          // sender message listener will be invoked
+          window.messageBus.send(event.senderId, event.data);
+        }
+	};
 </script>
 
 </html>

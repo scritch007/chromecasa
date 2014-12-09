@@ -10,12 +10,14 @@ import (
     "time"
     "encoding/json"
     "github.com/scritch007/chromecasa/chromecasa"
+    "math/rand"
+    "fmt"
 )
 
 var notDebugAuthenticatedTemplate = template.Must(template.New("").Parse(`
 <html><body>
 You have currently not given permissions to access your data. Please authenticate this app with the Google OAuth provider.
-<form action="/authorize?debug=1" method="POST"><input type="submit" value="Ok, authorize this app with my id"/></form>
+<form action="/authorize?provider=debug" method="POST"><input type="submit" value="Ok, authorize this app with my id"/></form>
 </body></html>
 `));
 
@@ -46,15 +48,17 @@ func (d *Debug) HandleOAuthCallback(w http.ResponseWriter, r *http.Request){
     expire := time.Now().AddDate(0, 0, 1)
     cookie := http.Cookie{Name: "chromecast_ref", Value: uid, Path: "/", Expires: expire}
     http.SetCookie(w, &cookie)
-    http.Redirect(w, r, "/?debug=1", http.StatusFound)
+    http.Redirect(w, r, "/?provider=debug", http.StatusFound)
 }
 
 func (d *Debug)HandleAlbum(w http.ResponseWriter, r *http.Request){
-    var result = make([]chromecasa.Album, 3)
+    loop := rand.Intn(10)
+    var result = make([]chromecasa.Folder, loop)
 
-    for i := 0; i < 3; i++{
+    fmt.Println("Got this loop", loop)
+    for i := 0; i < loop; i++{
         i_str := strconv.Itoa(i)
-        alb := chromecasa.Album{Name:"Album" + string(i_str), Id:string(i_str), Icon: "/img/default.png"}
+        alb := chromecasa.Folder{Name:"Album" + string(i_str), Id:string(i_str), Icon: "/img/default.png", Display: rand.Intn(2)==0, Browse: rand.Intn(2)==0}
         result[i] = alb
     }
     b, _ := json.Marshal(result)
@@ -75,7 +79,7 @@ func (d *Debug)HandleListAlbum(w http.ResponseWriter, r *http.Request){
 
 func (* Debug)HandleAuthorize(w http.ResponseWriter, r *http.Request){
 
-    http.Redirect(w, r, "/oauth2callback?debug=1", http.StatusFound)
+    http.Redirect(w, r, "/oauth2callback?provider=debug", http.StatusFound)
 }
 
 func (* Debug)HandleMain(w http.ResponseWriter, r *http.Request){

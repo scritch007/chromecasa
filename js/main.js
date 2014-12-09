@@ -1,7 +1,12 @@
 function sendRequest(url, success, error){
 
 	//Check if page was loaded in debug mode
-	url += window.location.search;
+	if (-1 != url.indexOf("?"))
+	{
+		url += "&"+window.location.search.substr(1);
+	}else{
+		url += window.location.search;
+	}
 
 	var xhr = new XMLHttpRequest();
     xhr.open("GET", url);
@@ -21,7 +26,7 @@ function sendRequest(url, success, error){
     }
 }
 function debug_mode(){
-	return (-1 != window.location.search.indexOf("debug=1"));
+	return (-1 != window.location.search.indexOf("provider=debug"));
 }
 
 
@@ -52,10 +57,17 @@ function display_images(result){
 }
 var g_albums = [];
 
+function addAlbums(albums){
+	g_albums.push(albums);
+	displayAlbums(albums);
+	document.getElementById("up_button").style.display = "";
+}
+
+
+
 function displayAlbums(albums){
 	var main_display = document.getElementById("main_display");
 	main_display.innerHTML = "";
-	g_albums = albums;
 
 	for(var i=0; i<albums.length; i++){
 		var album = albums[i];
@@ -68,21 +80,71 @@ function displayAlbums(albums){
 		alb_div.appendChild(img);
 		alb_div.appendChild(label);
 
+		var display_label = document.createElement("label");
+		display_label.innerHTML = "display "+album.display;
+		alb_div.appendChild(display_label);
+		var browse_label = document.createElement("label");
+		browse_label.innerHTML = "browse "+album.browse;
+		alb_div.appendChild(browse_label);
+
 		main_display.appendChild(alb_div);
 
-		alb_div.onclick = function(){
-			var album_id = album.id;
-			return function(){
-				if (! debug_mode() && !(-1 != window.location.search.indexOf("noccast=1"))) {
-					cast_api.sendMessage(cv_activity.activityId, 'BENJI', {command: {name: 'loading', parameters:{load:true}}});
-				}
-				sendRequest("/album/" + album_id, display_images);
+		if (album.display || album.browse)
+		{
+			var action_div = document.createElement("div");
+			alb_div.appendChild(action_div);
+
+			action_div.className = "action_div hidden";
+			alb_div.addEventListener("mouseover", function(){
+				this.className = "action_div";
+			}.bind(action_div)
+			);
+			alb_div.addEventListener("mouseout", function(){
+				this.className = "action_div hidden";
+			}.bind(action_div));
+
+			if (album.display)
+			{
+				var play = document.createElement("label");
+				play.className = "action_element";
+				play.innerHTML = "play";
+				play.addEventListener("click",
+					function(){
+						if (! debug_mode() && !(-1 != window.location.search.indexOf("noccast=1"))) {
+							cast_api.sendMessage(cv_activity.activityId, 'BENJI', {command: {name: 'loading', parameters:{load:true}}});
+						}
+						sendRequest("/display/" + this.id, display_images);
+					}.bind(album)
+				);
+				action_div.appendChild(play);
 			}
-		}();
+			if(album.browse){
+				var browse = document.createElement("label");
+				browse.className = "action_element";
+				browse.innerHTML = "browse";
+				browse.addEventListener("click",
+					function(){
+						sendRequest("/browse?path=" + this.id, addAlbums);
+					}.bind(album)
+				);
+				action_div.appendChild(browse);
+			}
+		}
 	}
 }
 
 function main(){
+	document.getElementById("up_button").addEventListener("click",
+		function(){
+			if (g_albums.length > 0){
+				g_albums = g_albums.slice(0, g_albums.length-1);
+			}
+			displayAlbums(g_albums[g_albums.length-1]);
+			if (1 == g_albums.length){
+				document.getElementById("up_button").style.display = "none";
+			}
+		}
+	)
 	if(debug_mode())
 	{
 		//If we are in debug mode then we'll load the javascript file for the slideshow display
@@ -90,5 +152,5 @@ function main(){
 		script.src = "/js/slideshow.js";
 		document.body.appendChild(script);
 	}
-	albums = sendRequest("album", displayAlbums);
+	albums = sendRequest("browse?path=/", addAlbums);
 }

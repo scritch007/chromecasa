@@ -10,6 +10,7 @@ import (
     "./picasa"
     "github.com/scritch007/chromecasa/chromecasa"
     "./debug"
+    "./dropbox"
 )
 
 var userInfoTemplate = template.Must(template.New("").Parse(`
@@ -33,12 +34,15 @@ func main() {
     p := new(picasa.Picasa)
     p.TokenStore = tStore
 
+    dr := new(dropbox.Dropbox)
+    dr.TokenStore = tStore
+
     //DEBUG URL Handlers implementation defined in debug.go
-    s := r.Queries("debug", "1").Subrouter()
+    s := r.Queries("provider", "debug").Subrouter()
     s.HandleFunc("/", d.HandleRoot)
     s.HandleFunc("/oauth2callback", d.HandleOAuthCallback)
-    s.HandleFunc("/album", d.HandleAlbum)
-    s.HandleFunc("/album/{id}", d.HandleListAlbum)
+    s.HandleFunc("/browse", d.HandleAlbum)
+    s.HandleFunc("/display/{id}", d.HandleListAlbum)
     s.HandleFunc("/authorize", d.HandleAuthorize)
     s.HandleFunc("/debug", d.HandleMain)
 
@@ -51,8 +55,14 @@ func main() {
     pic := r.Queries("provider", "picasa").Subrouter()
     pic.HandleFunc("/authorize", p.HandleAuthorize)
     pic.HandleFunc("/oauth2callback", p.HandleOAuth2Callback)
-    pic.HandleFunc("/album", p.HandleAlbum)
-    pic.HandleFunc("/album/{id}", p.HandleListAlbum)
+    pic.HandleFunc("/browse", p.HandleAlbum)
+    pic.HandleFunc("/display/{id}", p.HandleListAlbum)
+
+    drop := r.Queries("provider", "dropbox").Subrouter()
+    drop.HandleFunc("/authorize", dr.HandleAuthorize)
+    drop.HandleFunc("/oauth2callback", dr.HandleOAuth2Callback)
+    drop.HandleFunc("/browse", dr.HandleAlbum)
+    drop.HandleFunc("/display/{id}", dr.HandleListAlbum)
     http.Handle("/", r)
     //Google will redirect to this page to return your code, so handle it appropriately
     http.ListenAndServe("localhost:3000", nil)

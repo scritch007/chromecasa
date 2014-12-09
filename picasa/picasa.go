@@ -67,9 +67,9 @@ func (p *Picasa)HandleAlbum(w http.ResponseWriter, r *http.Request){
     buf, err := ioutil.ReadAll(resp.Body)
     m, _ := PicasaParse(buf)
 
-    var result = make([]chromecasa.Album, len(m.Feed.Entries))
+    var result = make([]chromecasa.Folder, len(m.Feed.Entries))
     for i, album := range m.Feed.Entries{
-        alb := chromecasa.Album{Name:album.Name.Value, Id:album.Id.Value, Icon: album.Media.Icon[0].Url}
+        alb := chromecasa.Folder{Name:album.Name.Value, Id:album.Id.Value, Icon: album.Media.Icon[0].Url, Display: true, Browse: false}
         result[i] = alb
     }
     b, _ := json.Marshal(result)

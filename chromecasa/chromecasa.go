@@ -15,10 +15,12 @@ type Image struct{
     Width string `json:"width"`
 }
 
-type Album struct{
+type Folder struct{
     Name string `json:"name"`
     Id string `json:"id"`
     Icon string `json:"icon"`
+    Display bool `json:"display"`
+    Browse bool `json:"browse"`
 }
 
 type Token struct{

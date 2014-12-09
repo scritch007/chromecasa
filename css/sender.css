@@ -28,9 +28,7 @@
 	margin-right: 20;
 	margin-bottom: 20;
 	margin-top: 20;*/
-	
 	border: 3px solid #CCC;
-	
 }
 .main_display_image{
 	display: block;
@@ -61,7 +59,19 @@
 }
 
 #command label:hover {
- 
     color: #ddd;
     background-color: #b00;
+}
+
+.action_div{
+
+}
+.action_element{
+
+}
+.action_element:hover{
+    background-color: pink;
+}
+.hidden{
+    display: none;
 }
